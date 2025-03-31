@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class='col-12 col-md-10 col-lg-10 col-xl-8 text-center pt-2' >
+            <h1 >Federal Holidays</h1>
+            <div class='card border border-2 border-grey mt-2'>            	
+				<div class='card-body ' style="overflow: auto">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                {% for m in df_holidays.columns: %}
+                                    <th scope="col"><span class="nowrap"><p class='lead'>{{m}}</p></span></th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for index, row in df_holidays.iterrows(): %} 
+                                <tr>
+                                {% for m in df_holidays.columns: %}  
+                                    {% if row[m]=='Off'%}
+                                        <td><span class="nowrap" style='background-color: green'>{{row[m]}}</span></td>
+                                    {% elif row[m]=='Working'%}
+                                        <td><span class="nowrap" style='background-color: crimson'>{{row[m]}}</span></td>
+                                    {% else %}
+                                        <td><span class="nowrap" >{{row[m]}}</span></td>
+                                    {% endif %}
+                                {% endfor %}
+                                </tr>
+                            {% endfor %}                            
+                        </tbody>
+                    </table>
+                </div>
+                <div class='row mt-2 justify-content-center'>
+                    <div class='col-lg-5 '>
+                        <button onclick="tableToCSV()">
+                            Export Table Data To CSV
+                        </button>
+                    </div>
+                </div>
+                <div class='row mt-2'>
+                    <p class='text-center lead'>Jenny's Holiday Total: {{jenny_ct}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row justify-content-center mb-6">
+        <div class='col-12 col-md-10 col-lg-10 col-xl-8 text-center mb-2' >
+            <div class="card d-block border border-2 border-grey mt-2 pt-2 container-fluid"  >
+                <h2>Select Days You're Off Work</h2>
+                <form method='POST' class='mt-1 form-floating'>
+                    {{ form.csrf_token }}
+                    <div class='row justify-content-center'>
+                        <div class='col-lg-7'>
+                            <div class="row my-2 justify-content-center">
+                                <div class='row'>
+                                    <label>Job Creator</label>
+                                </div>
+                                <div class='row'>
+                                    {{ form.user(class="form-control form-control-lg text-center") }}
+                                </div>
+                            </div>
+                            <div class="row my-2 justify-content-center">
+                                <div class="row my-2 justify-content-center">
+                                    <div class='row'>
+                                        <label>Holidays</label>
+                                    </div>
+                                    <div class='row'>
+                                      {{ form.holiday(class="form-control form-control-lg text-center",size=10) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-outline my-2">
+                                <button class="btn btn-primary" style='margin-bottom: 60px' type="submit" style='background-color: #0456d9; border-color: #a8a8a8;'>Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+    <script type="text/javascript">
+        function tableToCSV() {
+
+            // Variable to store the final csv data
+            let csv_data = [];
+
+            // Get each row data
+            let rows = document.getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+
+                // Get each column data
+                let cols = rows[i].querySelectorAll('td,th');
+
+                // Stores each csv row data
+                let csvrow = [];
+                for (let j = 0; j < cols.length; j++) {
+
+                    // Get the text data of each cell
+                    // of a row and push it to csvrow
+                    csvrow.push('"' + cols[j].innerText + '"');
+                }
+
+                // Combine each column value with comma
+                csv_data.push(csvrow.join(","));
+            }
+
+            // Combine each row data with new line character
+            csv_data = csv_data.join('\n');
+
+            // Call this function to download csv file  
+            downloadCSVFile(csv_data);
+
+        }
+
+        function downloadCSVFile(csv_data) {
+
+            // Create CSV file object and feed
+            // our csv_data into it
+            CSVFile = new Blob([csv_data], {
+                type: "text/csv"
+            });
+
+            // Create to temporary link to initiate
+            // download process
+            let temp_link = document.createElement('a');
+
+            // Download csv file
+            temp_link.download = "holidays.csv";
+            let url = window.URL.createObjectURL(CSVFile);
+            temp_link.href = url;
+
+            // This link should not be displayed
+            temp_link.style.display = "none";
+            document.body.appendChild(temp_link);
+
+            // Automatically click the link to
+            // trigger download
+            temp_link.click();
+            document.body.removeChild(temp_link);
+        }
+    </script>
+
+
+{% endblock %}
