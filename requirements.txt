@@ -11,6 +11,7 @@ MarkupSafe
 numpy==1.23.3
 pandas
 plotly
+requests
 scipy
 Werkzeug==2.0.2
 wincertstore
